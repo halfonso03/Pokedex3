@@ -28,16 +28,18 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         parsePokemonCSV()
         initAudio()
         searchBar.returnKeyType = .done
+        searchBar.showsCancelButton = true
     }
     
     func initAudio() {
         let path = Bundle.main.path(forResource: "music", ofType: "mp3")!
-        var url = URL(fileURLWithPath: path)
+        let url = URL(fileURLWithPath: path)
         do {
             musicPlayer = try AVAudioPlayer(contentsOf: url)
+            musicPlayer.volume = 1.0
             musicPlayer.prepareToPlay()
             musicPlayer.numberOfLoops = -1
-            musicPlayer.play()
+           // musicPlayer.play()
             
         }
         catch let error as NSError {
@@ -99,7 +101,16 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        return
+        var poke: Pokemon!
+        
+        if inSearchMode {
+            poke = filteredPokemon[indexPath.row]
+        }
+        else {
+            poke = pokemon[indexPath.row]
+        }
+        
+        performSegue(withIdentifier: "showDetail", sender: poke)
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -145,6 +156,18 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         view.endEditing(true)
+    }
+    
+    
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "showDetail" {
+            if let detailsVC = segue.destination as? PokemonDetailViewController {
+                if let poke = sender as? Pokemon {
+                    detailsVC.pokemon = poke
+                }
+            }
+        }
     }
 }
 
